@@ -32,9 +32,17 @@ public class Application
     public async Task Run()
     {
         _botClient.StartReceiving(HandleUpdateAsync, HandlePollingErrorAsync);
-        Console.WriteLine("Bot started. Press any key to exit");
-        Console.ReadKey();
-        _cancellationTokenSource.Cancel();
+        Console.WriteLine("Bot started. Press Ctrl+C to exit");
+
+        // Ждем завершения через CancellationToken
+        try
+        {
+            await Task.Delay(Timeout.Infinite, _cancellationTokenSource.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            // Graceful shutdown
+        }
     }
 
     private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -131,4 +139,5 @@ public class Application
         Console.WriteLine($"Error occurred: {exception.Message}");
         return Task.CompletedTask;
     }
+} 
 } 
