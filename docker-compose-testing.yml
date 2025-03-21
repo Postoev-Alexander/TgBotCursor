@@ -1,9 +1,6 @@
-version: '3.8'
-
 services:
   tgbotcursor:
     image: ghcr.io/postoev-alexander/tgbotcursor:main
-    container_name: tg.bot.cursor
     environment:
       - BOT_TOKEN=6408930022:AAFPLT5Onn9IXfTZONpu3G8ktldCovduapo
     deploy:
@@ -18,4 +15,4 @@ services:
       driver: "json-file"
       options:
         max-size: "10m"
-        max-file: "3" 
+        max-file: "3"
