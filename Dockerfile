@@ -14,13 +14,17 @@ RUN dotnet publish -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/runtime:8.0
 WORKDIR /app
 
-# Устанавливаем Python3 и Ansible
+# Устанавливаем Python3, pip и sshpass
 RUN apt-get update && \
     apt-get install -y python3 python3-pip sshpass && \
-    pip3 install ansible
+    python3 -m pip install --user --upgrade pip && \
+    python3 -m pip install --user ansible
 
 # Создаем директорию для Ansible плейбуков
 RUN mkdir -p /app/ansible-deploy
+
+# Добавляем pip --user установленные пакеты в PATH
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Копируем собранное приложение
 COPY --from=build /app/publish .
