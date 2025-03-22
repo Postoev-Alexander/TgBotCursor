@@ -14,12 +14,11 @@ RUN dotnet publish -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/runtime:8.0
 WORKDIR /app
 
-# Устанавливаем Python3, pipx и sshpass
+# Устанавливаем Python3, pip и sshpass
 RUN apt-get update && \
     apt-get install -y python3 python3-pip sshpass && \
-    python3 -m pip install --user pipx && \
-    python3 -m pipx ensurepath && \
-    pipx install ansible
+    python3 -m pip install --upgrade pip && \
+    python3 -m pip install ansible --break-system-packages
 
 # Создаем директорию для Ansible плейбуков
 RUN mkdir -p /app/ansible-deploy
