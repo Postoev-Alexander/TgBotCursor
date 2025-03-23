@@ -2,8 +2,6 @@ name: GitHub Actions Deploy tgbotcursor to server
 #run-name: ${{ github.actor }} is testing out GitHub Actions   🚀
 on:
     push:
-      branches:
-        - 'testing'
     workflow_dispatch:				
 
 env:
