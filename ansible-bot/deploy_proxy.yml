@@ -1,6 +1,6 @@
 ---
 - name: Установка Nginx Proxy Manager
-  hosts: servers
+  hosts: all
   become: yes
 
   tasks:

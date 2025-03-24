@@ -1,6 +1,7 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using System.Diagnostics;
 
 namespace TgBotCursor;
 
@@ -12,6 +13,7 @@ public class Application
     private const string LIST_SERVERS = "list_servers";
     private const string DEPLOY_PASSBOLT = "deploy_passbolt";
     private const string DEPLOY_VPN = "deploy_vpn";
+    private const string DEPLOY_PROXY = "deploy_proxy";
     private const string BACK = "back";
 
     private readonly TelegramBotClient _botClient;
@@ -102,6 +104,41 @@ public class Application
             case DEPLOY_VPN:
                 await _botClient.SendTextMessageAsync(chatId, "🔑 Ваш ключ VPN: ABC123XYZ", cancellationToken: cancellationToken);
                 break;
+            case DEPLOY_PROXY:
+                await _botClient.SendTextMessageAsync(chatId, "🔄 Начинаю установку Proxy...", cancellationToken: cancellationToken);
+                try 
+                {
+                    var process = new Process
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = "ansible-playbook",
+                            Arguments = "-i \"37.252.17.213,\" -u root --private-key /app/ansible-bot/ssh/ansible_key /app/ansible-bot/deploy_proxy.yml",
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        }
+                    };
+                    
+                    process.Start();
+                    var output = await process.StandardOutput.ReadToEndAsync();
+                    await process.WaitForExitAsync(cancellationToken);
+                    
+                    if (process.ExitCode == 0)
+                    {
+                        await _botClient.SendTextMessageAsync(chatId, "✅ Proxy успешно установлен!", cancellationToken: cancellationToken);
+                    }
+                    else
+                    {
+                        await _botClient.SendTextMessageAsync(chatId, "❌ Ошибка при установке Proxy", cancellationToken: cancellationToken);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка: {ex.Message}", cancellationToken: cancellationToken);
+                }
+                break;
             case BACK:
                 await ShowMainMenu(chatId, cancellationToken);
                 break;
@@ -128,6 +165,7 @@ public class Application
         {
             new[] { InlineKeyboardButton.WithCallbackData("Установить Passbolt", DEPLOY_PASSBOLT) },
             new[] { InlineKeyboardButton.WithCallbackData("Установить Outline VPN", DEPLOY_VPN) },
+            new[] { InlineKeyboardButton.WithCallbackData("Установить Proxy", DEPLOY_PROXY) },
             new[] { InlineKeyboardButton.WithCallbackData("« Назад", BACK) }
         });
 
