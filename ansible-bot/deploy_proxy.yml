@@ -1,0 +1,31 @@
+---
+- name: Установка Nginx Proxy Manager
+  hosts: servers
+  become: yes
+
+  tasks:
+    - name: Установить Docker
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+        state: present
+        update_cache: yes
+
+    - name: Создать папку для конфигов
+      file:
+        path: /opt/npm
+        state: directory
+
+    - name: Запустить контейнер
+      docker_container:
+        name: nginx-proxy-manager
+        image: jc21/nginx-proxy-manager:latest
+        ports:
+          - "80:80"
+          - "81:81"  # Веб-интерфейс
+          - "443:443"
+        volumes:
+          - /opt/npm/data:/data
+          - /opt/npm/letsencrypt:/etc/letsencrypt
+        restart_policy: always

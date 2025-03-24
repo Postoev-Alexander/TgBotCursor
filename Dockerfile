@@ -24,11 +24,12 @@ RUN apt-get update && \
 # Устанавливаем Ansible через pip без кэша с обходом ограничений
 RUN pip3 install --no-cache-dir ansible --break-system-packages
 
-# Создаем директорию для Ansible плейбуков
-RUN mkdir -p /app/ansible-deploy
-
 # Копируем собранное приложение
 COPY --from=build /app/publish .
+
+# Копируем содержимое каталога ansible-bot
+COPY ansible-bot/ /app/ansible-bot/
+RUN chmod 600 /app/ansible-bot/ssh/ansible_key
 
 # Указываем точку входа
 ENTRYPOINT ["dotnet", "TgBotCursor.dll"]
