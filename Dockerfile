@@ -29,7 +29,10 @@ COPY --from=build /app/publish .
 
 # Копируем содержимое каталога ansible-bot
 COPY ansible-bot/ /app/ansible-bot/
-RUN chmod 600 /app/ansible-bot/ssh/ansible_key
+
+# Сохранение ключа
+ARG ANSIBLE_DEPLOY_KEY
+RUN echo "$ANSIBLE_DEPLOY_KEY" > /app/ansible-bot/ssh/ansible_key && chmod 600 /app/ansible-bot/ssh/ansible_key
 
 # Указываем точку входа
 ENTRYPOINT ["dotnet", "TgBotCursor.dll"]

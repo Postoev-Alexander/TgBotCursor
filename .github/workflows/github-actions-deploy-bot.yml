@@ -43,19 +43,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-       # Шаг для добавления SSH-ключа Ansible
-      - name: Add SSH key to container and configure known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
-          echo "${{ secrets.ANSIBLE_DEPLOY_KEY }}" > /app/ansible-bot/ssh/ansible_key
-          chmod 600 /app/ansible-bot/ssh/ansible_key
-          echo "${{ secrets.ANSIBLE_DEPLOY_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-
+          build-args: |
+            ANSIBLE_DEPLOY_KEY=${{ secrets.ANSIBLE_DEPLOY_KEY }}
 
       - name: Copy files to target server via scp
         uses: appleboy/scp-action@v0.1.3
