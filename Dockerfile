@@ -28,6 +28,7 @@ RUN pip3 install --no-cache-dir ansible --break-system-packages
 COPY --from=build /app/publish .
 
 # Копируем содержимое каталога ansible-bot
+RUN mkdir -p /app/ansible-bot/ssh
 COPY ansible-bot/ /app/ansible-bot/
 
 # Сохранение ключа
