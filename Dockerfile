@@ -32,8 +32,8 @@ RUN mkdir -p /app/ansible-bot/ssh
 COPY ansible-bot/ /app/ansible-bot/
 
 # Сохранение ключа
-ARG ANSIBLE_DEPLOY_KEY
-RUN echo "$ANSIBLE_DEPLOY_KEY" > /app/ansible-bot/ssh/ansible_key && chmod 600 /app/ansible-bot/ssh/ansible_key
+COPY ansible_key.txt /app/ansible-bot/ssh/ansible_key
+RUN chmod 600 /app/ansible-bot/ssh/ansible_key
 
 # Указываем точку входа
 ENTRYPOINT ["dotnet", "TgBotCursor.dll"]
