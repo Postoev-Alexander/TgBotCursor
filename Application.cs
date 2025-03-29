@@ -140,9 +140,9 @@ public class Application
         await _botClient.EditMessageTextAsync(chatId, messageId, "Деплой сервисов:", replyMarkup: keyboard, cancellationToken: cancellationToken);
     }
 
-    private async Task ExecuteAnsiblePlaybook(string inventory, string playbook, long chatId, CancellationToken cancellationToken)
+    private async Task ExecuteAnsiblePlaybook(string inventory, /*string playbook,*/ long chatId, CancellationToken cancellationToken)
     {
-        await _botClient.SendTextMessageAsync(chatId, $"🔄 Начинаю установку... {playbook}", cancellationToken: cancellationToken);
+        await _botClient.SendTextMessageAsync(chatId, $"🔄 Начинаю установку... ", cancellationToken: cancellationToken);
         try 
         {
             var process = new Process
@@ -150,7 +150,7 @@ public class Application
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "ansible-playbook",
-                    Arguments = $"all -i {inventory} ping.yml ",
+                    Arguments = $"all -i {inventory} ping.yml",
                     WorkingDirectory = "/app/ansible-bot",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
