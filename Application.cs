@@ -131,7 +131,7 @@ public class Application
                     
                     if (process.ExitCode == 0)
                     {
-                        await _botClient.SendTextMessageAsync(chatId, $"✅ Proxy успешно установлен!\n\nЛог:\n{output}", cancellationToken: cancellationToken);
+                        await _botClient.SendTextMessageAsync(chatId, $"✅ Proxy успешно установлен!\n\nЛог:\n{output} \n---------\n{error}", cancellationToken: cancellationToken);
                     }
                     else
                     {
