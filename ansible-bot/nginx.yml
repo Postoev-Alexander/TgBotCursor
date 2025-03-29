@@ -1,0 +1,43 @@
+---
+- name: Install and Configure Nginx
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update apt cache and install Nginx
+      apt:
+        name: nginx
+        state: latest
+        update_cache: yes
+
+    - name: Copy nginx configuration
+      copy:
+        src: files/nginx/nginx.conf
+        dest: /etc/nginx/nginx.conf
+        mode: '0644'
+      notify: Restart Nginx
+
+    - name: Copy site configuration
+      copy:
+        src: files/nginx/domain_name.conf
+        dest: /etc/nginx/sites-available/domain_name.conf
+        mode: '0644'
+      notify: Restart Nginx
+
+    - name: Enable site configuration
+      file:
+        src: /etc/nginx/sites-available/domain_name.conf
+        dest: /etc/nginx/sites-enabled/domain_name.conf
+        state: link
+      notify: Restart Nginx
+
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
