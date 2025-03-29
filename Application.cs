@@ -126,15 +126,16 @@ public class Application
                     
                     process.Start();
                     var output = await process.StandardOutput.ReadToEndAsync();
+                    var error = await process.StandardError.ReadToEndAsync();
                     await process.WaitForExitAsync(cancellationToken);
                     
                     if (process.ExitCode == 0)
                     {
-                        await _botClient.SendTextMessageAsync(chatId, "✅ Proxy успешно установлен!", cancellationToken: cancellationToken);
+                        await _botClient.SendTextMessageAsync(chatId, $"✅ Proxy успешно установлен!\n\nЛог:\n{output}", cancellationToken: cancellationToken);
                     }
                     else
                     {
-                        await _botClient.SendTextMessageAsync(chatId, "❌ Ошибка при установке Proxy", cancellationToken: cancellationToken);
+                        await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка при установке Proxy:\n\nЛог:\n{output}\n\nОшибка:\n{error}", cancellationToken: cancellationToken);
                     }
                 }
                 catch (Exception ex)
