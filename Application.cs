@@ -99,13 +99,13 @@ public class Application
                 await _botClient.SendTextMessageAsync(chatId, "📋 Список серверов:\n- Server 1\n- Server 2", cancellationToken: cancellationToken);
                 break;
             case DEPLOY_PASSBOLT:
-                await ExecuteAnsiblePlaybook("nginx.yml", "hosts.ini", chatId, cancellationToken);
+                await ExecuteAnsiblePlaybook(/*"nginx.yml",*/ "hosts.ini", chatId, cancellationToken);
                 break;
             case DEPLOY_VPN:
-                await ExecuteAnsiblePlaybook("-m shell -a \"uptime\"", "hosts.ini", chatId, cancellationToken);
+                await ExecuteAnsiblePlaybook(/*"-m shell -a \"uptime\"",*/ "hosts.ini", chatId, cancellationToken);
                 break;
             case DEPLOY_PROXY:
-                await ExecuteAnsiblePlaybook("ping.yml", "hosts.ini", chatId, cancellationToken);
+                await ExecuteAnsiblePlaybook(/*"ping.yml",*/ "hosts.ini", chatId, cancellationToken);
                 break;
             case BACK:
                 await ShowMainMenu(chatId, cancellationToken);
@@ -150,7 +150,7 @@ public class Application
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "ansible-playbook",
-                    Arguments = $"all -i {inventory} {playbook} ",
+                    Arguments = $"all -i {inventory} ping.yml ",
                     WorkingDirectory = "/app/ansible-bot",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
