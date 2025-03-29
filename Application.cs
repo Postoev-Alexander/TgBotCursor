@@ -142,7 +142,7 @@ public class Application
 
     private async Task ExecuteAnsiblePlaybook(string inventory, string playbook, long chatId, CancellationToken cancellationToken)
     {
-        await _botClient.SendTextMessageAsync(chatId, "🔄 Начинаю установку... \"{playbook}\"", cancellationToken: cancellationToken);
+        await _botClient.SendTextMessageAsync(chatId, $"🔄 Начинаю установку... {playbook}", cancellationToken: cancellationToken);
         try 
         {
             var process = new Process
@@ -150,7 +150,7 @@ public class Application
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "ansible-playbook",
-                    Arguments = $"all -i \"{inventory}\" \"{playbook}\" ",
+                    Arguments = $"all -i {inventory} {playbook} ",
                     WorkingDirectory = "/app/ansible-bot",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
