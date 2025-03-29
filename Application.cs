@@ -112,8 +112,11 @@ public class Application
                     {
                         StartInfo = new ProcessStartInfo
                         {
-                            FileName = "ansible-playbook",
-                            Arguments = "-i \"37.252.17.213,\" -u root --private-key /app/ansible-bot/ssh/ansible_key /app/ansible-bot/deploy_proxy.yml",
+                            FileName = "ansible",
+                            //FileName = "ansible-playbook",
+                            Arguments = "all -i hosts.ini -m shell -a \"uptime\"",
+                            //Arguments = "-i \"37.252.17.213,\" -u root --private-key /app/ansible-bot/ssh/ansible_key /app/ansible-bot/deploy_proxy.yml",
+                            WorkingDirectory = "/app/ansible-bot",
                             RedirectStandardOutput = true,
                             RedirectStandardError = true,
                             UseShellExecute = false,
