@@ -129,7 +129,7 @@ public class Application
                     var error = await process.StandardError.ReadToEndAsync();
                     await process.WaitForExitAsync(cancellationToken);
                     
-                    if (process.ExitCode == 0)
+                    if (process.ExitCode == 0 || error.Length > 0 )
                     {
                         await _botClient.SendTextMessageAsync(chatId, $"✅ Proxy успешно установлен!\n\nЛог:\n{output} \n---------\n{error}", cancellationToken: cancellationToken);
                     }
