@@ -150,7 +150,7 @@ public class Application
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "ansible-playbook",
-                    Arguments = $"all -i {inventory} ping.yml",
+                    Arguments = $"-i hosts.ini ping.yml",
                     WorkingDirectory = "/app/ansible-bot",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
