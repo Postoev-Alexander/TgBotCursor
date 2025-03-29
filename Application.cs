@@ -99,118 +99,13 @@ public class Application
                 await _botClient.SendTextMessageAsync(chatId, "📋 Список серверов:\n- Server 1\n- Server 2", cancellationToken: cancellationToken);
                 break;
             case DEPLOY_PASSBOLT:
-                await _botClient.SendTextMessageAsync(chatId, "🔄 Установка Passbolt...", cancellationToken: cancellationToken);
-                try 
-                {
-                    var process = new Process
-                    {
-                        StartInfo = new ProcessStartInfo
-                        {
-                            FileName = "ansible-playbook",
-                            Arguments = "-i hosts.ini ping.yml",
-                            WorkingDirectory = "/app/ansible-bot",
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        }
-                    };
-                    
-                    process.Start();
-                    var output = await process.StandardOutput.ReadToEndAsync();
-                    var error = await process.StandardError.ReadToEndAsync();
-                    await process.WaitForExitAsync(cancellationToken);
-                    
-                    if (process.ExitCode != 0 || error.Length > 0 )
-                    {
-                        await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка при установке Passbolt:\n\nЛог:\n{output}\n\nОшибка:\n{error}", cancellationToken: cancellationToken);
-                    }
-                    else
-                    {
-                        await _botClient.SendTextMessageAsync(chatId, $"✅ Passbolt успешно установлен!\n\nЛог:\n{output} \n---------\n{error}", cancellationToken: cancellationToken);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка: {ex.Message}", cancellationToken: cancellationToken);
-                }
+                await ExecuteAnsiblePlaybook("nginx.yml", "hosts.ini", chatId, cancellationToken);
                 break;
             case DEPLOY_VPN:
-                //await _botClient.SendTextMessageAsync(chatId, "🔑 Ваш ключ VPN: ABC123XYZ", cancellationToken: cancellationToken);
-                await _botClient.SendTextMessageAsync(chatId, "🔄 Установка Nginx...", cancellationToken: cancellationToken);
-                try 
-                {
-                    var process = new Process
-                    {
-                        StartInfo = new ProcessStartInfo
-                        {
-                            FileName = "ansible-playbook",
-                            Arguments = "-i hosts.ini nginx.yml",
-                            WorkingDirectory = "/app/ansible-bot",
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        }
-                    };
-                    
-                    process.Start();
-                    var output = await process.StandardOutput.ReadToEndAsync();
-                    var error = await process.StandardError.ReadToEndAsync();
-                    await process.WaitForExitAsync(cancellationToken);
-                    
-                    if (process.ExitCode != 0 || error.Length > 0 )
-                    {
-                        await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка при установке Nginx:\n\nЛог:\n{output}\n\nОшибка:\n{error}", cancellationToken: cancellationToken);
-                    }
-                    else
-                    {
-                        await _botClient.SendTextMessageAsync(chatId, $"✅ Nginx успешно установлен!\n\nЛог:\n{output} \n---------\n{error}", cancellationToken: cancellationToken);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка: {ex.Message}", cancellationToken: cancellationToken);
-                }
+                await ExecuteAnsiblePlaybook("-m shell -a \"uptime\"", "hosts.ini", chatId, cancellationToken);
                 break;
             case DEPLOY_PROXY:
-                await _botClient.SendTextMessageAsync(chatId, "🔄 Начинаю установку Proxy...", cancellationToken: cancellationToken);
-                try 
-                {
-                    var process = new Process
-                    {
-                        StartInfo = new ProcessStartInfo
-                        {
-                            FileName = "ansible",
-                            //FileName = "ansible-playbook",
-                            Arguments = "all -i hosts.ini -m shell -a \"uptime\"",
-                            //Arguments = "-i \"37.252.17.213,\" -u root --private-key /app/ansible-bot/ssh/ansible_key /app/ansible-bot/deploy_proxy.yml",
-                            WorkingDirectory = "/app/ansible-bot",
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        }
-                    };
-                    
-                    process.Start();
-                    var output = await process.StandardOutput.ReadToEndAsync();
-                    var error = await process.StandardError.ReadToEndAsync();
-                    await process.WaitForExitAsync(cancellationToken);
-                    
-                    if (process.ExitCode != 0 || error.Length > 0 )
-                    {
-                        await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка при установке Proxy:\n\nЛог:\n{output}\n\nОшибка:\n{error}", cancellationToken: cancellationToken);
-                    }
-                    else
-                    {
-                        await _botClient.SendTextMessageAsync(chatId, $"✅ Proxy успешно установлен!\n\nЛог:\n{output} \n---------\n{error}", cancellationToken: cancellationToken);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка: {ex.Message}", cancellationToken: cancellationToken);
-                }
+                await ExecuteAnsiblePlaybook("ping.yml", "hosts.ini", chatId, cancellationToken);
                 break;
             case BACK:
                 await ShowMainMenu(chatId, cancellationToken);
@@ -243,6 +138,45 @@ public class Application
         });
 
         await _botClient.EditMessageTextAsync(chatId, messageId, "Деплой сервисов:", replyMarkup: keyboard, cancellationToken: cancellationToken);
+    }
+
+    private async Task ExecuteAnsiblePlaybook(string inventory, string playbook, long chatId, CancellationToken cancellationToken)
+    {
+        await _botClient.SendTextMessageAsync(chatId, "🔄 Начинаю установку... \"{playbook}\"", cancellationToken: cancellationToken);
+        try 
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "ansible-playbook",
+                    Arguments = $"all -i \"{inventory}\" \"{playbook}\" ",
+                    WorkingDirectory = "/app/ansible-bot",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            
+            process.Start();
+            var output = await process.StandardOutput.ReadToEndAsync();
+            var error = await process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync(cancellationToken);
+            
+            if (process.ExitCode != 0 || error.Length > 0 )
+            {
+                await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка:\n\nЛог:\n{output}\n\nОшибка:\n{error}", cancellationToken: cancellationToken);
+            }
+            else
+            {
+                await _botClient.SendTextMessageAsync(chatId, $"✅ Установка завершена успешно!\n\nЛог:\n{output} \n---------\n{error}", cancellationToken: cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка: {ex.Message}", cancellationToken: cancellationToken);
+        }
     }
 
     private Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

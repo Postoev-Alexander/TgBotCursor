@@ -6,12 +6,10 @@
   - name: Task ping 
     ping:
   
-  tasks:
   - name: Update cache
     apt: 
       update_cache: yes
         
-  tasks:
   - name: Upgrade
     apt: 
       upgrade: yes
