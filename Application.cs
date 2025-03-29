@@ -100,6 +100,41 @@ public class Application
                 break;
             case DEPLOY_PASSBOLT:
                 await _botClient.SendTextMessageAsync(chatId, "🔄 Установка Passbolt...", cancellationToken: cancellationToken);
+                try 
+                {
+                    var process = new Process
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = "ansible-playbook",
+                            //Arguments = "all -i hosts.ini -m shell -a \"uptime\"",
+                            Arguments = "-i hosts.ini ping.yml",
+                            WorkingDirectory = "/app/ansible-bot",
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        }
+                    };
+                    
+                    process.Start();
+                    var output = await process.StandardOutput.ReadToEndAsync();
+                    var error = await process.StandardError.ReadToEndAsync();
+                    await process.WaitForExitAsync(cancellationToken);
+                    
+                    if (process.ExitCode != 0 || error.Length > 0 )
+                    {
+                        await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка при установке Passbolt:\n\nЛог:\n{output}\n\nОшибка:\n{error}", cancellationToken: cancellationToken);
+                    }
+                    else
+                    {
+                        await _botClient.SendTextMessageAsync(chatId, $"✅ Passbolt успешно установлен!\n\nЛог:\n{output} \n---------\n{error}", cancellationToken: cancellationToken);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка: {ex.Message}", cancellationToken: cancellationToken);
+                }
                 break;
             case DEPLOY_VPN:
                 await _botClient.SendTextMessageAsync(chatId, "🔑 Ваш ключ VPN: ABC123XYZ", cancellationToken: cancellationToken);
