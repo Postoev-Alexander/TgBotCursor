@@ -99,13 +99,13 @@ public class Application
                 await _botClient.SendTextMessageAsync(chatId, "📋 Список серверов:\n- Server 1\n- Server 2", cancellationToken: cancellationToken);
                 break;
             case DEPLOY_PASSBOLT:
-                await ExecuteAnsiblePlaybook(/*"nginx.yml",*/ "hosts.ini", chatId, cancellationToken);
+                await ExecuteAnsiblePlaybook("hosts.ini", "nginx.yml", chatId, cancellationToken);
                 break;
             case DEPLOY_VPN:
-                await ExecuteAnsiblePlaybook(/*"-m shell -a \"uptime\"",*/ "hosts.ini", chatId, cancellationToken);
+                await ExecuteAnsiblePlaybook("hosts.ini", "-m shell -a \"uptime\"", chatId, cancellationToken);
                 break;
             case DEPLOY_PROXY:
-                await ExecuteAnsiblePlaybook(/*"ping.yml",*/ "hosts.ini", chatId, cancellationToken);
+                await ExecuteAnsiblePlaybook("hosts.ini", "ping.yml", chatId, cancellationToken);
                 break;
             case BACK:
                 await ShowMainMenu(chatId, cancellationToken);
@@ -140,7 +140,7 @@ public class Application
         await _botClient.EditMessageTextAsync(chatId, messageId, "Деплой сервисов:", replyMarkup: keyboard, cancellationToken: cancellationToken);
     }
 
-    private async Task ExecuteAnsiblePlaybook(string inventory, /*string playbook,*/ long chatId, CancellationToken cancellationToken)
+    private async Task ExecuteAnsiblePlaybook(string inventory, string playbook, long chatId, CancellationToken cancellationToken)
     {
         await _botClient.SendTextMessageAsync(chatId, $"🔄 Начинаю установку... ", cancellationToken: cancellationToken);
         try 
@@ -150,7 +150,7 @@ public class Application
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "ansible-playbook",
-                    Arguments = $"-i hosts.ini ping.yml",
+                    Arguments = $"-i {inventory} {playbook}",
                     WorkingDirectory = "/app/ansible-bot",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
