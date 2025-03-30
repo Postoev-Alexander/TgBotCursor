@@ -102,7 +102,7 @@ public class Application
                 await ExecuteAnsiblePlaybook("hosts.ini", "nginx.yml", chatId, cancellationToken);
                 break;
             case DEPLOY_VPN:
-                await ExecuteAnsiblePlaybook("hosts.ini", "-m shell -a \"uptime\"", chatId, cancellationToken);
+                await ExecuteAnsibleCommand("hosts.ini", "-m shell -a \"uptime\"", chatId, cancellationToken);
                 break;
             case DEPLOY_PROXY:
                 await ExecuteAnsiblePlaybook("hosts.ini", "ping.yml", chatId, cancellationToken);
@@ -171,6 +171,45 @@ public class Application
             else
             {
                 await _botClient.SendTextMessageAsync(chatId, $"✅ Установка завершена успешно!\n\nЛог:\n{output} \n---------\n{error}", cancellationToken: cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка: {ex.Message}", cancellationToken: cancellationToken);
+        }
+    }
+
+    private async Task ExecuteAnsibleCommand(string inventory, string command, long chatId, CancellationToken cancellationToken)
+    {
+        await _botClient.SendTextMessageAsync(chatId, $"🔄 Начинаю выполнение команды... ", cancellationToken: cancellationToken);
+        try 
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "ansible",
+                    Arguments = $"-i {inventory} all {command}",
+                    WorkingDirectory = "/app/ansible-bot",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            
+            process.Start();
+            var output = await process.StandardOutput.ReadToEndAsync();
+            var error = await process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync(cancellationToken);
+            
+            if (process.ExitCode != 0 || error.Length > 0 )
+            {
+                await _botClient.SendTextMessageAsync(chatId, $"❌ Ошибка:\n\nЛог:\n{output}\n\nОшибка:\n{error}", cancellationToken: cancellationToken);
+            }
+            else
+            {
+                await _botClient.SendTextMessageAsync(chatId, $"✅ Команда выполнена успешно!\n\nЛог:\n{output} \n---------\n{error}", cancellationToken: cancellationToken);
             }
         }
         catch (Exception ex)
