@@ -1,0 +1,17 @@
+- name: Install tree htop
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: ping
+    ping: 
+
+  - name: instal htop tree  
+    apt:
+      pkg:
+        - htop
+        - tree 
+      state: present
+
+
+  

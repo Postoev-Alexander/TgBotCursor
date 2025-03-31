@@ -99,7 +99,7 @@ public class Application
                 await _botClient.SendTextMessageAsync(chatId, "📋 Список серверов:\n- Server 1\n- Server 2", cancellationToken: cancellationToken);
                 break;
             case DEPLOY_PASSBOLT:
-                await ExecuteAnsiblePlaybook("hosts.ini", "nginx.yml", chatId, cancellationToken);
+                await ExecuteAnsiblePlaybook("hosts.ini", "playbook_htop_tree.yml", chatId, cancellationToken);
                 break;
             case DEPLOY_VPN:
                 await ExecuteAnsibleCommand("hosts.ini", "-m shell -a \"uptime\"", chatId, cancellationToken);
